@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>销售日历UI原型 - 高保真设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 自定义橙色系色彩系统 */
+        :root {
+            --primary-orange: #FF6B35;
+            --primary-light: #FF8C5A;
+            --primary-dark: #E55A2B;
+            --secondary-blue: #3498DB;
+            --success-green: #27AE60;
+            --warning-yellow: #F39C12;
+            --danger-red: #E74C3C;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-400: #9CA3AF;
+            --gray-500: #6B7280;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --gray-800: #1F2937;
+            --gray-900: #111827;
+        }
+        
+        .bg-primary { background-color: var(--primary-orange); }
+        .text-primary { color: var(--primary-orange); }
+        .border-primary { border-color: var(--primary-orange); }
+        
+        /* 状态颜色 */
+        .status-pending { background-color: var(--secondary-blue); color: white; }
+        .status-overdue { background-color: var(--danger-red); color: white; }
+        .status-delayed { background-color: var(--warning-yellow); color: white; }
+        .status-completed { background-color: var(--success-green); color: white; }
+        
+        /* 日历格子状态颜色 */
+        .calendar-cell.pending { border-left: 4px solid var(--secondary-blue); }
+        .calendar-cell.overdue { border-left: 4px solid var(--danger-red); }
+        .calendar-cell.delayed { border-left: 4px solid var(--warning-yellow); }
+        .calendar-cell.completed { border-left: 4px solid var(--success-green); }
+        
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            .mobile-container { max-width: 375px; margin: 0 auto; }
+            .mobile-padding { padding: 16px; }
+        }
+        
+        /* 卡片阴影 */
+        .card-shadow { 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        /* 渐变背景 */
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--primary-orange) 0%, var(--primary-light) 100%);
+        }
+        
+        /* 动画效果 */
+        .hover-lift {
+            transition: transform 0.2s ease-in-out;
+        }
+        .hover-lift:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    
+    <!-- 页面1: 日历主界面 -->
+    <div id="page-calendar" class="mobile-container">
+        <div class="bg-white rounded-lg shadow-lg mb-8">
+            <!-- 顶部导航 -->
+            <div class="gradient-bg text-white p-6 rounded-t-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h1 class="text-2xl font-bold">销售日历</h1>
+                        <p class="text-orange-100">2026年3月</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="bg-white/20 hover:bg-white/30 p-2 rounded-full">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <button class="bg-white/20 hover:bg-white/30 p-2 rounded-full">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 视图切换 -->
+                <div class="flex space-x-2">
+                    <button class="bg-white text-primary px-4 py-2 rounded-full font-semibold">月</button>
+                    <button class="text-white/80 hover:text-white px-4 py-2 rounded-full">周</button>
+                    <button class="text-white/80 hover:text-white px-4 py-2 rounded-full">日</button>
+                </div>
+            </div>
+            
+            <!-- 日历网格 -->
+            <div class="p-4">
+                <!-- 星期标题 -->
+                <div class="grid grid-cols-7 gap-1 mb-2">
+                    <div class="text-center text-gray-500 text-sm font-medium py-2">日</div>
+                    <div class="text-center text-gray-500 text-sm font-medium py-2">一</div>
+                    <div class="text-center text-gray-500 text-sm font-medium py-2">二</div>
+                    <div class="text-center text-gray-500 text-sm font-medium py-2">三</div>
+                    <div class="text-center text-gray-500 text-sm font-medium py-2">四</div>
+                    <div class="text-center text-gray-500 text-sm font-medium py-2">五</div>
+                    <div class="text-center text-gray-500 text-sm font-medium py-2">六</div>
+                </div>
+                
+                <!-- 日期格子 -->
+                <div class="grid grid-cols-7 gap-1">
+                    <!-- 示例日期格子 -->
+                    <div class="calendar-cell pending bg-white rounded-lg p-2 min-h-[80px] border-l-4 border-blue-500">
+                        <div class="text-sm text-gray-500 mb-1">28</div>
+                        <div class="space-y-1">
+                            <div class="bg-blue-100 text-blue-800 text-xs px-1 rounded">2</div>
+                        </div>
+                    </div>
+                    
+                    <div class="calendar-cell overdue bg-white rounded-lg p-2 min-h-[80px] border-l-4 border-red-500">
+                        <div class="text-sm text-gray-500 mb-1">1</div>
+                        <div class="space-y-1">
+                            <div class="bg-red-100 text-red-800 text-xs px-1 rounded">1</div>
+                        </div>
+                    </div>
+                    
+                    <div class="calendar-cell delayed bg-white rounded-lg p-2 min-h-[80px] border-l-4 border-yellow-500">
+                        <div class="text-sm text-gray-500 mb-1">2</div>
+                        <div class="space-y-1">
+                            <div class="bg-yellow-100 text-yellow-800 text-xs px-1 rounded">1</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 今天 -->
+                    <div class="calendar-cell pending bg-orange-50 rounded-lg p-2 min-h-[80px] border-l-4 border-blue-500 border-2 border-orange-300">
+                        <div class="text-sm font-semibold text-primary mb-1">3</div>
+                        <div class="space-y-1">
+                            <div class="bg-blue-100 text-blue-800 text-xs px-1 rounded">3</div>
+                        </div>
+                    </div>
+                    
+                    <div class="calendar-cell completed bg-white rounded-lg p-2 min-h-[80px] border-l-4 border-green-500">
+                        <div class="text-sm text-gray-500 mb-1">4</div>
+                        <div class="space-y-1">
+                            <div class="bg-green-100 text-green-800 text-xs px-1 rounded">2</div>
+                        </div>
+                    </div>
+                    
+                    <div class="calendar-cell pending bg-white rounded-lg p-2 min-h-[80px] border-l-4 border-blue-500">
+                        <div class="text-sm text-gray-500 mb-1">5</div>
+                        <div class="space-y-1">
+                            <div class="bg-blue-100 text-blue-800 text-xs px-1 rounded">1</div>
+                        </div>
+                    </div>
+                    
+                    <div class="calendar-cell pending bg-white rounded-lg p-2 min-h-[80px] border-l-4 border-blue-500">
+                        <div class="text-sm text-gray-500 mb-1">6</div>
+                        <div class="space-y-1">
+                            <div class="bg-blue-100 text-blue-800 text-xs px-1 rounded">2</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 底部操作栏 -->
+            <div class="border-t border-gray-200 p-4">
+                <button class="w-full bg-primary hover:bg-primary-dark text-white py-3 rounded-lg font-semibold flex items-center justify-center space-x-2">
+                    <i class="fas fa-plus"></i>
+                    <span>新建待办事项</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 状态说明 -->
+        <div class="bg-white rounded-lg shadow-lg p-4 mb-8">
+            <h3 class="font-semibold text-gray-700 mb-3">待办状态说明</h3>
+            <div class="grid grid-cols-2 gap-2">
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 bg-blue-500 rounded"></div>
+                    <span class="text-sm text-gray-600">正在待办</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 bg-red-500 rounded"></div>
+                    <span class="text-sm text-gray-600">超期待办</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 bg-yellow-500 rounded"></div>
+                    <span class="text-sm text-gray-600">延期待办</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 bg-green-500 rounded"></div>
+                    <span class="text-sm text-gray-600">已完成</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 页面2: 待办事项详情 -->
+    <div id="page-todo-detail" class="mobile-container hidden">
+        <div class="bg-white rounded-lg shadow-lg mb-8">
+            <!-- 顶部返回 -->
+            <div class="border-b border-gray-200 p-4">
+                <button class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+            
+            <!-- 待办详情内容 -->
+            <div class="p-6">
+                <!-- 状态标签 -->
+                <div class="inline-block status-pending px-3 py-1 rounded-full text-sm font-medium mb-4">
+                    正在待办
+                </div>
+                
+                <h2 class="text-xl font-bold text-gray-800 mb-2">拜访四川隆昌建筑工程有限公司</h2>
+                <p class="text-gray-600 mb-6">讨论自贡航空产业世纪海棠建设项目合作事宜</p>
+                
+                <!-- 基本信息 -->
+                <div class="space-y-4 mb-6">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">计划时间</span>
+                        <span class="font-semibold">2026-03-03 09:00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">拜访方式</span>
+                        <span class="font-semibold">上门拜访</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">优先级</span>
+                        <span class="font-semibold text-red-500">高</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">关联线索</span>
+                        <span class="font-semibold text-primary">四川隆昌建筑工程有限公司</span>
+                    </div>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="space-y-3">
+                    <button class="w-full bg-primary hover:bg-primary-dark text-white py-3 rounded-lg font-semibold">
+                        打卡完成
+                    </button>
+                    <button class="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 py-3 rounded-lg font-semibold">
+                        延期处理
+                    </button>
+                    <button class="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 py-3 rounded-lg font-semibold">
+                        查看线索详情
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 页面3: 销售线索详情 -->
+    <div id="page-lead-detail" class="mobile-container hidden">
+        <div class="bg-white rounded-lg shadow-lg mb-8">
+            <!-- 顶部返回 -->
+            <div class="border-b border-gray-200 p-4">
+                <button class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+            
+            <!-- 线索详情内容 -->
+            <div class="p-6">
+                <!-- 企业信息 -->
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-br from-primary to-primary-light rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-3">
+                        隆
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800">四川隆昌建筑工程有限公司</h2>
+                    <p class="text-gray-600">建筑工程行业 • 200-500人</p>
+                </div>
+                
+                <!-- 联系人信息 -->
+                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                    <h3 class="font-semibold text-gray-700 mb-3">联系人信息</h3>
+                    <div class="space-y-2">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-user text-gray-400"></i>
+                            <span>张总</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-phone text-gray-400"></i>
+                            <span>13800138000</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-envelope text-gray-400"></i>
+                            <span>zhang@longchang.com</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 商机信息 -->
+                <div class="mb-6">
+                    <h3 class="font-semibold text-gray-700 mb-3">商机信息</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-primary">50万</div>
+                            <div class="text-sm text-gray-500">预估价值</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-500">跟进中</div>
+                            <div class="text-sm text-gray-500">线索状态</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 跟进记录 -->
+                <div>
+                    <h3 class="font-semibold text-gray-700 mb-3">最近跟进</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                            <div>
+                                <div class="font-medium">技术方案沟通</div>
+                                <div class="text-sm text-gray-500">2026-03-01 • 周雨涵</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                            <div>
+                                <div class="font-medium">初步接触</div>
+                                <div class="text-sm text-gray-500">2026-02-28 • 周雨涵</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 页面4: 新建待办事项 -->
+    <div id="page-new-todo" class="mobile-container hidden">
+        <div class="bg-white rounded-lg shadow-lg mb-8">
+            <!-- 顶部返回 -->
+            <div class="border-b border-gray-200 p-4">
+                <button class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <span class="font-semibold text-gray-700 ml-4">新建待办事项</span>
+            </div>
+            
+            <!-- 表单内容 -->
+            <div class="p-6">
+                <form class="space-y-6">
+                    <!-- 待办标题 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">待办标题</label>
+                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="请输入待办事项标题">
+                    </div>
+                    
+                    <!-- 关联销售线索 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">关联销售线索</label>
+                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option>请选择销售线索</option>
+                            <option>四川隆昌建筑工程有限公司</option>
+                            <option>长川科技(内江)有限公司</option>
+                            <option>邦泰翡翠二期项目</option>
+                        </select>
+                    </div>
+                    
+                    <!-- 时间选择 -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">计划日期</label>
+                            <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">计划时间</label>
+                            <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                    </div>
+                    
+                    <!-- 拜访方式 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">拜访方式</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" class="py-2 border border-gray-300 rounded-lg text-gray-600 hover:border-primary hover:text-primary">上门拜访</button>
+                            <button type="button" class="py-2 border border-gray-300 rounded-lg text-gray-600 hover:border-primary hover:text-primary">电话拜访</button>
+                            <button type="button" class="py-2 border border-gray-300 rounded-lg text-gray-600 hover:border-primary hover:text-primary">视频会议</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 优先级 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">优先级</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" class="py-2 border border-red-300 bg-red-50 text-red-600 rounded-lg font-semibold">高</button>
+                            <button type="button" class="py-2 border border-gray-300 rounded-lg text-gray-600">中</button>
+                            <button type="button" class="py-2 border border-gray-300 rounded-lg text-gray-600">低</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 备注 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">备注信息</label>
+                        <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" rows="3" placeholder="请输入备注信息"></textarea>
+                    </div>
+                    
+                    <!-- 提交按钮 -->
+                    <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white py-3 rounded-lg font-semibold">
+                        创建待办事项
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 页面导航 -->
+    <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white rounded-full shadow-lg p-2">
+        <div class="flex space-x-1">
+            <button onclick="showPage('page-calendar')" class="px-4 py-2 rounded-full bg-primary text-white font-semibold">日历</button>
+            <button onclick="showPage('page-todo-detail')" class="px-4 py-2 rounded-full text-gray-600 hover:bg-gray-100">待办</button>
+            <button onclick="showPage('page-lead-detail')" class="px-4 py-2 rounded-full text-gray-600 hover:bg-gray-100">线索</button>
+            <button onclick="showPage('page-new-todo')" class="px-4 py-2 rounded-full text-gray-600 hover:bg-gray-100">新建</button>
+        </div>
+    </div>
+    
+    <script>
+        function showPage(pageId) {
+            // 隐藏所有页面
+            document.querySelectorAll('[id^="page-"]').forEach(page => {
+                page.classList.add('hidden');
+            });
+            
+            // 显示目标页面
+            document.getElementById(pageId).classList.remove('hidden');
+            
+            // 更新导航按钮状态
+            document.querySelectorAll('.fixed button').forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-white');
+                btn.classList.add('text-gray-600', 'hover:bg-gray-100');
+            });
+            
+            event.target.classList.add('bg-primary', 'text-white');
+            event.target.classList.remove('text-gray-600', 'hover:bg-gray-100');
+        }
+        
+        // 默认显示日历页面
+        document.addEventListener('DOMContentLoaded', function() {
+            showPage('page-calendar');
+        });
+    </script>
+</body>
+</html>
