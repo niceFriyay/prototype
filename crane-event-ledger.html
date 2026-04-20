@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塔机异常事件通用台账</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .container {
+            width: 100%;
+            min-height: 100vh;
+            background-color: #f5f7fa;
+        }
+
+        /* 页面标题 */
+        .page-header {
+            background: linear-gradient(135deg, #1e5799 0%, #2989d8 50%, #207cca 100%);
+            color: #fff;
+            padding: 20px 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* 筛选区 */
+        .filter-section {
+            background: #fff;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-item label {
+            color: #666;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .filter-item select,
+        .filter-item input {
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #fff;
+            min-width: 160px;
+            transition: border-color 0.3s;
+        }
+
+        .filter-item select:focus,
+        .filter-item input:focus {
+            outline: none;
+            border-color: #2989d8;
+        }
+
+        .filter-item input[type="date"] {
+            width: 140px;
+        }
+
+        /* 条件筛选器容器 */
+        .conditional-filters {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .conditional-filter {
+            display: none;
+        }
+
+        .conditional-filter.active {
+            display: flex;
+        }
+
+        /* 按钮 */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #2989d8;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #1e5799;
+        }
+
+        .btn-default {
+            background: #fff;
+            color: #666;
+            border: 1px solid #d9d9d9;
+        }
+
+        .btn-default:hover {
+            color: #2989d8;
+            border-color: #2989d8;
+        }
+
+        /* 表格区域 */
+        .table-section {
+            padding: 20px 30px;
+        }
+
+        .table-wrapper {
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1400px;
+        }
+
+        /* 两级表头样式 */
+        thead th {
+            background: #e8f4fc;
+            color: #1e5799;
+            font-weight: 600;
+            text-align: center;
+            border: 1px solid #b8d4e8;
+            padding: 12px 8px;
+        }
+
+        thead th:first-child {
+            background: #e8f4fc;
+        }
+
+        /* 一级表头跨列 */
+        .level-1-header {
+            background: linear-gradient(135deg, #1e5799 0%, #2989d8 100%);
+            color: #fff;
+            font-size: 15px;
+        }
+
+        /* 二级表头 */
+        .level-2-header {
+            background: #e8f4fc;
+            color: #1e5799;
+            font-size: 14px;
+        }
+
+        /* 表格内容 */
+        tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:nth-child(odd) {
+            background-color: #fafbfc;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #fff;
+        }
+
+        tbody tr:hover {
+            background-color: #e8f4fc;
+        }
+
+        tbody td {
+            padding: 10px 8px;
+            text-align: center;
+            border: 1px solid #e8e8e8;
+            color: #333;
+            font-size: 13px;
+        }
+
+        /* 序号列 */
+        tbody td:first-child {
+            font-weight: 500;
+            color: #666;
+        }
+
+        /* 时间列 */
+        .time-col {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        /* 事件类型标签 */
+        .event-type-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .event-type-tag.device-alarm {
+            background: #fff2f0;
+            color: #ff4d4f;
+        }
+
+        .event-type-tag.violation-warning {
+            background: #fffbe6;
+            color: #faad14;
+        }
+
+        .event-type-tag.fault {
+            background: #f0f5ff;
+            color: #597ef7;
+        }
+
+        /* 设备报警类型标签 */
+        .alarm-tag {
+            background: #fff2f0;
+            color: #ff4d4f;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        /* 违章预警类型标签 */
+        .violation-tag {
+            background: #fffbe6;
+            color: #faad14;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        /* 故障类型标签 */
+        .fault-tag {
+            background: #f0f5ff;
+            color: #597ef7;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        /* 数值列 */
+        .numeric {
+            font-family: 'Consolas', 'Microsoft YaHei', monospace;
+            color: #1e5799;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <h1>塔机异常事件通用台账</h1>
+        </div>
+
+        <!-- 筛选区 -->
+        <div class="filter-section">
+            <!-- 事件类型 -->
+            <div class="filter-item">
+                <label>事件：</label>
+                <select id="eventType">
+                    <option value="">全部</option>
+                    <option value="device-alarm">设备报警</option>
+                    <option value="violation-warning">违章操作预警</option>
+                    <option value="fault">设备故障</option>
+                </select>
+            </div>
+
+            <!-- 塔机产权备案号 -->
+            <div class="filter-item">
+                <label>塔机产权备案号：</label>
+                <select id="deviceRegister">
+                    <option value="">全部</option>
+                    <option value="JS00001">JS00001</option>
+                    <option value="JS00002">JS00002</option>
+                    <option value="JS00003">JS00003</option>
+                </select>
+            </div>
+
+            <!-- 时间范围 -->
+            <div class="filter-item">
+                <label>时间：</label>
+                <input type="date" id="startDate">
+                <span>~</span>
+                <input type="date" id="endDate">
+            </div>
+
+            <!-- 条件筛选器容器 -->
+            <div class="conditional-filters">
+                <!-- 设备报警类型 -->
+                <div class="filter-item conditional-filter" id="deviceAlarmFilter">
+                    <label>设备报警类型：</label>
+                    <select id="deviceAlarmType">
+                        <option value="">全部</option>
+                        <option value="overload">起重量超载</option>
+                        <option value="torque-overload">力矩超载</option>
+                        <option value="limit-alarm">限位报警</option>
+                        <option value="wind-speed">风速过大</option>
+                        <option value="slewing-warning">变幅警告</option>
+                        <option value="tilt">塔身倾斜</option>
+                        <option value="interference">相互干涉报警</option>
+                        <option value="obstacle-collision">障碍物碰撞</option>
+                        <option value="forbidden-zone">禁行区保护报警</option>
+                    </select>
+                </div>
+
+                <!-- 违章操作预警 -->
+                <div class="filter-item conditional-filter" id="violationFilter">
+                    <label>违章操作预警类型：</label>
+                    <select id="violationType">
+                        <option value="">全部</option>
+                        <option value="overload">起重量超载</option>
+                        <option value="area-limit">区域限制</option>
+                        <option value="identity-verify">身份验证</option>
+                        <option value="device-collision">设备相互碰撞</option>
+                        <option value="obstacle-collision">障碍物碰撞</option>
+                    </select>
+                </div>
+
+                <!-- 设备故障 -->
+                <div class="filter-item conditional-filter" id="faultFilter">
+                    <label>设备故障类型：</label>
+                    <select id="faultType">
+                        <option value="">全部</option>
+                        <option value="monitor-fault">监控系统故障</option>
+                        <option value="limiter-fault">限位器故障</option>
+                        <option value="balance-fault">平衡故障</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 按钮 -->
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="handleQuery()">查询</button>
+                <button class="btn btn-default" onclick="handleReset()">重置</button>
+            </div>
+        </div>
+
+        <!-- 数据表格 -->
+        <div class="table-section">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <!-- 一级表头 -->
+                        <tr>
+                            <th rowspan="2">序号</th>
+                            <th rowspan="2">时间</th>
+                            <th rowspan="2">产权备案号</th>
+                            <th rowspan="2">现场编号</th>
+                            <th rowspan="2">事件</th>
+                            <th rowspan="2">事件类型</th>
+                            <th rowspan="2">事件原因</th>
+                            <th colspan="7" class="level-1-header">事件运行状态</th>
+                        </tr>
+                        <!-- 二级表头 -->
+                        <tr>
+                            <th class="level-2-header">幅度</th>
+                            <th class="level-2-header">倾角</th>
+                            <th class="level-2-header">高度</th>
+                            <th class="level-2-header">吊重</th>
+                            <th class="level-2-header">力矩</th>
+                            <th class="level-2-header">风速</th>
+                            <th class="level-2-header">回转角度</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- 数据行将通过JavaScript动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟数据
+        var mockData = [
+            {
+                id: 1,
+                time: '2024-04-20 14:32:15',
+                registerNo: 'JS00001',
+                siteNo: 'TC-001',
+                event: 'device-alarm',
+                eventType: 'overload',
+                eventReason: '起重量超过额定载荷的110%，触发超载保护机制',
+                amplitude: '25.6m',
+                tiltAngle: '0.8°',
+                height: '45.2m',
+                weight: '12.5t',
+                torque: '320%',
+                windSpeed: '8.2m/s',
+                rotationAngle: '135°'
+            },
+            {
+                id: 2,
+                time: '2024-04-20 10:15:42',
+                registerNo: 'JS00002',
+                siteNo: 'TC-002',
+                event: 'violation-warning',
+                eventType: 'area-limit',
+                eventReason: '——',
+                amplitude: '18.3m',
+                tiltAngle: '0.5°',
+                height: '38.7m',
+                weight: '6.8t',
+                torque: '185%',
+                windSpeed: '——',
+                rotationAngle: '——'
+            },
+            {
+                id: 3,
+                time: '2024-04-19 16:48:33',
+                registerNo: 'JS00003',
+                siteNo: 'TC-003',
+                event: 'fault',
+                eventType: 'monitor-fault',
+                eventReason: '监控模块通信中断，数据传输异常，需检查网络连接',
+                amplitude: '32.1m',
+                tiltAngle: '——',
+                height: '52.4m',
+                weight: '8.2t',
+                torque: '210%',
+                windSpeed: '6.8m/s',
+                rotationAngle: '200°'
+            }
+        ];
+
+        // 事件类型映射
+        var eventTypeMap = {
+            'device-alarm': '设备报警',
+            'violation-warning': '违章操作预警',
+            'fault': '设备故障'
+        };
+
+        // 设备报警类型映射
+        var deviceAlarmTypeMap = {
+            'overload': '起重量超载',
+            'torque-overload': '力矩超载',
+            'limit-alarm': '限位报警',
+            'wind-speed': '风速过大',
+            'slewing-warning': '变幅警告',
+            'tilt': '塔身倾斜',
+            'interference': '相互干涉报警',
+            'obstacle-collision': '障碍物碰撞',
+            'forbidden-zone': '禁行区保护报警'
+        };
+
+        // 违章操作预警类型映射
+        var violationTypeMap = {
+            'overload': '起重量超载',
+            'area-limit': '区域限制',
+            'identity-verify': '身份验证',
+            'device-collision': '设备相互碰撞',
+            'obstacle-collision': '障碍物碰撞'
+        };
+
+        // 设备故障类型映射
+        var faultTypeMap = {
+            'monitor-fault': '监控系统故障',
+            'limiter-fault': '限位器故障',
+            'balance-fault': '平衡故障'
+        };
+
+        // 获取事件类型对应的样式类
+        function getEventTypeClass(event) {
+            switch(event) {
+                case 'device-alarm': return 'device-alarm';
+                case 'violation-warning': return 'violation-warning';
+                case 'fault': return 'fault';
+                default: return '';
+            }
+        }
+
+        // 获取事件类型的显示标签
+        function getEventTypeLabel(event, eventType) {
+            switch(event) {
+                case 'device-alarm':
+                    return '<span class="alarm-tag">' + deviceAlarmTypeMap[eventType] + '</span>';
+                case 'violation-warning':
+                    return '<span class="violation-tag">' + violationTypeMap[eventType] + '</span>';
+                case 'fault':
+                    return '<span class="fault-tag">' + faultTypeMap[eventType] + '</span>';
+                default:
+                    return eventType;
+            }
+        }
+
+        // 渲染表格数据
+        function renderTable(data) {
+            var tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+
+            if (data.length === 0) {
+                var tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="14" style="text-align:center;padding:40px;color:#999;">暂无数据</td>';
+                tableBody.appendChild(tr);
+                return;
+            }
+
+            data.forEach(function(item) {
+                var tr = document.createElement('tr');
+                tr.innerHTML = 
+                    '<td>' + item.id + '</td>' +
+                    '<td class="time-col">' + item.time + '</td>' +
+                    '<td>' + item.registerNo + '</td>' +
+                    '<td>' + item.siteNo + '</td>' +
+                    '<td><span class="event-type-tag ' + getEventTypeClass(item.event) + '">' + eventTypeMap[item.event] + '</span></td>' +
+                    '<td>' + getEventTypeLabel(item.event, item.eventType) + '</td>' +
+                    '<td style="text-align:left;max-width:200px;">' + item.eventReason + '</td>' +
+                    '<td class="numeric">' + item.amplitude + '</td>' +
+                    '<td class="numeric">' + item.tiltAngle + '</td>' +
+                    '<td class="numeric">' + item.height + '</td>' +
+                    '<td class="numeric">' + item.weight + '</td>' +
+                    '<td class="numeric">' + item.torque + '</td>' +
+                    '<td class="numeric">' + item.windSpeed + '</td>' +
+                    '<td class="numeric">' + item.rotationAngle + '</td>';
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // 事件类型切换 - 控制条件筛选器的显示隐藏
+        function handleEventTypeChange() {
+            var eventType = document.getElementById('eventType').value;
+            var deviceAlarmFilter = document.getElementById('deviceAlarmFilter');
+            var violationFilter = document.getElementById('violationFilter');
+            var faultFilter = document.getElementById('faultFilter');
+
+            // 隐藏所有条件筛选器
+            deviceAlarmFilter.classList.remove('active');
+            violationFilter.classList.remove('active');
+            faultFilter.classList.remove('active');
+
+            // 根据选择显示对应的筛选器
+            switch(eventType) {
+                case 'device-alarm':
+                    deviceAlarmFilter.classList.add('active');
+                    break;
+                case 'violation-warning':
+                    violationFilter.classList.add('active');
+                    break;
+                case 'fault':
+                    faultFilter.classList.add('active');
+                    break;
+            }
+        }
+
+        // 查询功能
+        function handleQuery() {
+            var eventType = document.getElementById('eventType').value;
+            var registerNo = document.getElementById('deviceRegister').value;
+            var startDate = document.getElementById('startDate').value;
+            var endDate = document.getElementById('endDate').value;
+            var deviceAlarmType = document.getElementById('deviceAlarmType').value;
+            var violationType = document.getElementById('violationType').value;
+            var faultType = document.getElementById('faultType').value;
+
+            // 过滤数据
+            var filteredData = mockData.filter(function(item) {
+                // 事件类型过滤
+                if (eventType && item.event !== eventType) {
+                    return false;
+                }
+                // 产权备案号过滤
+                if (registerNo && item.registerNo !== registerNo) {
+                    return false;
+                }
+                // 设备报警类型过滤
+                if (eventType === 'device-alarm' && deviceAlarmType && item.eventType !== deviceAlarmType) {
+                    return false;
+                }
+                // 违章操作预警过滤
+                if (eventType === 'violation-warning' && violationType && item.eventType !== violationType) {
+                    return false;
+                }
+                // 设备故障过滤
+                if (eventType === 'fault' && faultType && item.eventType !== faultType) {
+                    return false;
+                }
+                // 时间范围过滤
+                if (startDate && item.time < startDate) {
+                    return false;
+                }
+                if (endDate && item.time.substring(0, 10) > endDate) {
+                    return false;
+                }
+                return true;
+            });
+
+            // 重新渲染表格
+            renderTable(filteredData);
+        }
+
+        // 重置功能
+        function handleReset() {
+            // 清空所有筛选条件
+            document.getElementById('eventType').value = '';
+            document.getElementById('deviceRegister').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('deviceAlarmType').value = '';
+            document.getElementById('violationType').value = '';
+            document.getElementById('faultType').value = '';
+
+            // 隐藏所有条件筛选器
+            document.getElementById('deviceAlarmFilter').classList.remove('active');
+            document.getElementById('violationFilter').classList.remove('active');
+            document.getElementById('faultFilter').classList.remove('active');
+
+            // 重新渲染全部数据
+            renderTable(mockData);
+        }
+
+        // 绑定事件类型切换事件
+        document.getElementById('eventType').addEventListener('change', handleEventTypeChange);
+
+        // 页面加载完成后初始化
+        window.onload = function() {
+            // 设置默认时间范围为最近一周
+            var today = new Date();
+            var lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+            document.getElementById('endDate').value = today.toISOString().substring(0, 10);
+            document.getElementById('startDate').value = lastWeek.toISOString().substring(0, 10);
+
+            // 渲染初始数据
+            renderTable(mockData);
+        };
+    </script>
+</body>
+</html>
