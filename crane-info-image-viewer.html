@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塔机基础信息图片管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .container {
+            width: 100%;
+            min-height: 100vh;
+            background-color: #f5f7fa;
+            padding: 20px;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #1e5799 0%, #2989d8 50%, #207cca 100%);
+            color: #fff;
+            padding: 20px 30px;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e5799;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8f4fc;
+        }
+
+        .basic-info {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .qrcode-section {
+            flex: 0 0 200px;
+        }
+
+        .qrcode-section img {
+            width: 180px;
+            height: 180px;
+            border: 1px solid #e8e8e8;
+            border-radius: 4px;
+        }
+
+        .qrcode-section .qrcode-print {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            color: #2989d8;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .info-section {
+            flex: 1;
+            min-width: 400px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-label {
+            color: #666;
+            font-weight: 500;
+            min-width: 100px;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .info-value a {
+            color: #2989d8;
+            text-decoration: none;
+        }
+
+        .info-value a:hover {
+            text-decoration: underline;
+        }
+
+        .document-section {
+            margin-top: 30px;
+        }
+
+        .document-card {
+            background: #fafbfc;
+            border: 1px solid #e8e8e8;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .document-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .thumbnail-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .thumbnail-item {
+            width: 120px;
+            height: 120px;
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: #f0f0f0;
+        }
+
+        .thumbnail-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .thumbnail-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .thumbnail-item.more-btn {
+            background: #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .thumbnail-item.more-btn:hover {
+            background: #d9d9d9;
+            color: #1e5799;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+
+        @keyframes skeleton-loading {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 80vw;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e8e8e8;
+            background: #f8f9fa;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .modal-close {
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: #f0f0f0;
+            border-radius: 4px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .modal-close:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .modal-body {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px 20px;
+            border-top: 1px solid #e8e8e8;
+            background: #f8f9fa;
+            gap: 20px;
+        }
+
+        .nav-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: #2989d8;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #1e5799;
+            transform: scale(1.1);
+        }
+
+        .nav-btn:disabled {
+            background: #d9d9d9;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .image-counter {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .loading-text {
+            color: #999;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .basic-info {
+                flex-direction: column;
+            }
+
+            .qrcode-section {
+                flex: 1;
+            }
+
+            .info-section {
+                min-width: 100%;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .thumbnail-list {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>塔机基础信息</h1>
+        </div>
+
+        <div class="card">
+            <div class="card-title">基础信息</div>
+            <div class="basic-info">
+                <div class="qrcode-section">
+                    <img src="https://via.placeholder.com/180x180/cccccc/333333?text=二维码" alt="二维码">
+                    <a href="#" class="qrcode-print">二维码打印</a>
+                </div>
+                <div class="info-section">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">现场编号：</span>
+                            <span class="info-value">1</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">产权备案号：</span>
+                            <span class="info-value"><a href="#">川JF-T-2205-02912</a></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">产权单位：</span>
+                            <span class="info-value">四川某建筑工程有限公司</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">规格型号：</span>
+                            <span class="info-value">QTZ6013</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">备案时间：</span>
+                            <span class="info-value">2022-05-18 10:48:07</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">到期时间：</span>
+                            <span class="info-value">2029-10-09 00:00:00</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">制造厂家：</span>
+                            <span class="info-value">四川卓玛特工有限公司</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">制造许可：</span>
+                            <span class="info-value">TS2451150-2023</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card document-section">
+            <div class="card-title">证件资料</div>
+            
+            <div class="document-card">
+                <div class="document-title">安装资质</div>
+                <div class="thumbnail-list" id="install资质List"></div>
+            </div>
+
+            <div class="document-card">
+                <div class="document-title">安装告知表</div>
+                <div class="thumbnail-list" id="install告知表List"></div>
+            </div>
+
+            <div class="document-card">
+                <div class="document-title">检测报告</div>
+                <div class="thumbnail-list" id="检测报告List"></div>
+            </div>
+
+            <div class="document-card">
+                <div class="document-title">使用登记证</div>
+                <div class="thumbnail-list" id="使用登记证List"></div>
+            </div>
+
+            <div class="document-card">
+                <div class="document-title">安装验收表</div>
+                <div class="thumbnail-list" id="安装验收表List"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title" id="modalTitle">图片查看</span>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <img class="modal-image" id="modalImage" src="" alt="查看图片">
+            </div>
+            <div class="modal-footer" id="modalFooter">
+                <button class="nav-btn" id="prevBtn" onclick="prevImage()">‹</button>
+                <span class="image-counter" id="imageCounter">1/7</span>
+                <button class="nav-btn" id="nextBtn" onclick="nextImage()">›</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var currentImages = [];
+        var currentIndex = 0;
+        var isMultiImageMode = false;
+
+        var documentImages = {
+            install资质: [
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装资质1',
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装资质2'
+            ],
+            install告知表: [
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装告知表1',
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装告知表2',
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装告知表3'
+            ],
+            检测报告: [
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=检测报告1',
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=检测报告2',
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=检测报告3',
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=检测报告4',
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=检测报告5',
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=检测报告6'
+            ],
+            使用登记证: [
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=使用登记证1'
+            ],
+            安装验收表: [
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装验收表1',
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装验收表2',
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装验收表3',
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装验收表4',
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装验收表5',
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装验收表6',
+                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装验收表7'
+            ]
+        };
+
+        function renderThumbnailList(containerId, images) {
+            var container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            if (images.length === 0) {
+                container.innerHTML = '<span class="loading-text">暂无图片</span>';
+                return;
+            }
+
+            if (images.length <= 5) {
+                images.forEach(function(url, index) {
+                    var item = document.createElement('div');
+                    item.className = 'thumbnail-item skeleton';
+                    item.innerHTML = '<img src="' + url + '" alt="图片' + (index + 1) + '" onload="this.parentElement.classList.remove(\'skeleton\')">';
+                    item.onclick = function() {
+                        openSingleImageModal(url);
+                    };
+                    container.appendChild(item);
+                });
+            } else {
+                for (var i = 0; i < 4; i++) {
+                    var item = document.createElement('div');
+                    item.className = 'thumbnail-item skeleton';
+                    item.innerHTML = '<img src="' + images[i] + '" alt="图片' + (i + 1) + '" onload="this.parentElement.classList.remove(\'skeleton\')">';
+                    item.onclick = function(index) {
+                        return function() {
+                            openSingleImageModal(images[index]);
+                        };
+                    }(i);
+                    container.appendChild(item);
+                }
+
+                var moreBtn = document.createElement('div');
+                moreBtn.className = 'thumbnail-item more-btn';
+                moreBtn.textContent = '+' + (images.length - 4);
+                moreBtn.onclick = function() {
+                    openMultiImageModal(images);
+                };
+                container.appendChild(moreBtn);
+            }
+        }
+
+        function openSingleImageModal(url) {
+            currentImages = [url];
+            currentIndex = 0;
+            isMultiImageMode = false;
+
+            document.getElementById('modalImage').src = url;
+            document.getElementById('modalTitle').textContent = '图片查看';
+            document.getElementById('imageCounter').textContent = '1/1';
+            document.getElementById('modalFooter').style.display = 'none';
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function openMultiImageModal(images) {
+            currentImages = images;
+            currentIndex = 0;
+            isMultiImageMode = true;
+
+            document.getElementById('modalImage').src = images[0];
+            document.getElementById('modalTitle').textContent = '图片浏览';
+            document.getElementById('imageCounter').textContent = '1/' + images.length;
+            document.getElementById('modalFooter').style.display = 'flex';
+            updateNavButtons();
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.getElementById('modalImage').src = '';
+        }
+
+        function prevImage() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                document.getElementById('modalImage').src = currentImages[currentIndex];
+                document.getElementById('imageCounter').textContent = (currentIndex + 1) + '/' + currentImages.length;
+                updateNavButtons();
+            }
+        }
+
+        function nextImage() {
+            if (currentIndex < currentImages.length - 1) {
+                currentIndex++;
+                document.getElementById('modalImage').src = currentImages[currentIndex];
+                document.getElementById('imageCounter').textContent = (currentIndex + 1) + '/' + currentImages.length;
+                updateNavButtons();
+            }
+        }
+
+        function updateNavButtons() {
+            document.getElementById('prevBtn').disabled = currentIndex === 0;
+            document.getElementById('nextBtn').disabled = currentIndex === currentImages.length - 1;
+        }
+
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (!document.getElementById('modalOverlay').classList.contains('active')) {
+                return;
+            }
+
+            if (e.key === 'Escape') {
+                closeModal();
+            } else if (isMultiImageMode) {
+                if (e.key === 'ArrowLeft') {
+                    prevImage();
+                } else if (e.key === 'ArrowRight') {
+                    nextImage();
+                }
+            }
+        });
+
+        renderThumbnailList('install资质List', documentImages.install资质);
+        renderThumbnailList('install告知表List', documentImages.install告知表);
+        renderThumbnailList('检测报告List', documentImages.检测报告);
+        renderThumbnailList('使用登记证List', documentImages.使用登记证);
+        renderThumbnailList('安装验收表List', documentImages.安装验收表);
+    </script>
+</body>
+</html>
