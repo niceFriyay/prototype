@@ -226,8 +226,8 @@
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            max-width: 80vw;
-            max-height: 80vh;
+            max-width: 70vw;
+            max-height: 70vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -461,33 +461,33 @@
 
         var documentImages = {
             install资质: [
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装资质1',
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装资质2'
+                'https://picsum.photos/800/600?random=1',
+                'https://picsum.photos/800/600?random=2'
             ],
             install告知表: [
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装告知表1',
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装告知表2',
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装告知表3'
+                'https://picsum.photos/800/600?random=3',
+                'https://picsum.photos/800/600?random=4',
+                'https://picsum.photos/800/600?random=5'
             ],
             检测报告: [
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=检测报告1',
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=检测报告2',
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=检测报告3',
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=检测报告4',
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=检测报告5',
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=检测报告6'
+                'https://picsum.photos/800/600?random=6',
+                'https://picsum.photos/800/600?random=7',
+                'https://picsum.photos/800/600?random=8',
+                'https://picsum.photos/800/600?random=9',
+                'https://picsum.photos/800/600?random=10',
+                'https://picsum.photos/800/600?random=11'
             ],
             使用登记证: [
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=使用登记证1'
+                'https://picsum.photos/800/600?random=12'
             ],
             安装验收表: [
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装验收表1',
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装验收表2',
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装验收表3',
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装验收表4',
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装验收表5',
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装验收表6',
-                'https://via.placeholder.com/800x600/f8e6e9/ffffff?text=安装验收表7'
+                'https://picsum.photos/800/600?random=13',
+                'https://picsum.photos/800/600?random=14',
+                'https://picsum.photos/800/600?random=15',
+                'https://picsum.photos/800/600?random=16',
+                'https://picsum.photos/800/600?random=17',
+                'https://picsum.photos/800/600?random=18',
+                'https://picsum.photos/800/600?random=19'
             ]
         };
 
@@ -506,7 +506,7 @@
                     item.className = 'thumbnail-item skeleton';
                     item.innerHTML = '<img src="' + url + '" alt="图片' + (index + 1) + '" onload="this.parentElement.classList.remove(\'skeleton\')">';
                     item.onclick = function() {
-                        openSingleImageModal(url);
+                        openImageModal(images, index);
                     };
                     container.appendChild(item);
                 });
@@ -517,7 +517,7 @@
                     item.innerHTML = '<img src="' + images[i] + '" alt="图片' + (i + 1) + '" onload="this.parentElement.classList.remove(\'skeleton\')">';
                     item.onclick = function(index) {
                         return function() {
-                            openSingleImageModal(images[index]);
+                            openImageModal(images, index);
                         };
                     }(i);
                     container.appendChild(item);
@@ -527,36 +527,26 @@
                 moreBtn.className = 'thumbnail-item more-btn';
                 moreBtn.textContent = '+' + (images.length - 4);
                 moreBtn.onclick = function() {
-                    openMultiImageModal(images);
+                    openImageModal(images, 0);
                 };
                 container.appendChild(moreBtn);
             }
         }
 
-        function openSingleImageModal(url) {
-            currentImages = [url];
-            currentIndex = 0;
-            isMultiImageMode = false;
-
-            document.getElementById('modalImage').src = url;
-            document.getElementById('modalTitle').textContent = '图片查看';
-            document.getElementById('imageCounter').textContent = '1/1';
-            document.getElementById('modalFooter').style.display = 'none';
-            document.getElementById('modalOverlay').classList.add('active');
-        }
-
-        function openMultiImageModal(images) {
+        function openImageModal(images, index) {
             currentImages = images;
-            currentIndex = 0;
-            isMultiImageMode = true;
+            currentIndex = index;
+            isMultiImageMode = images.length > 1;
 
-            document.getElementById('modalImage').src = images[0];
+            document.getElementById('modalImage').src = images[index];
             document.getElementById('modalTitle').textContent = '图片浏览';
-            document.getElementById('imageCounter').textContent = '1/' + images.length;
-            document.getElementById('modalFooter').style.display = 'flex';
+            document.getElementById('imageCounter').textContent = (index + 1) + '/' + images.length;
+            document.getElementById('modalFooter').style.display = isMultiImageMode ? 'flex' : 'none';
             updateNavButtons();
             document.getElementById('modalOverlay').classList.add('active');
         }
+
+
 
         function closeModal() {
             document.getElementById('modalOverlay').classList.remove('active');
