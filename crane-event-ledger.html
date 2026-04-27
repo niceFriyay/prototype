@@ -274,6 +274,79 @@
             font-family: 'Consolas', 'Microsoft YaHei', monospace;
             color: #1e5799;
         }
+
+        /* 分页组件 */
+        .pagination-section {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .pagination-info {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pagination-btn {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        .pagination-btn:disabled {
+            background: #f5f5f5;
+            color: #ccc;
+            border-color: #e8e8e8;
+            cursor: not-allowed;
+        }
+
+        .page-numbers {
+            display: flex;
+            gap: 4px;
+        }
+
+        .page-number {
+            padding: 6px 10px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            min-width: 30px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .page-number:hover {
+            border-color: #2989d8;
+            color: #2989d8;
+        }
+
+        .page-number.active {
+            background: #2989d8;
+            color: #fff;
+            border-color: #2989d8;
+        }
+
+        .page-size {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .page-size select {
+            padding: 4px 8px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -398,61 +471,93 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- 分页组件 -->
+            <div class="pagination-section">
+                <div class="pagination-info">
+                    <span>共 <span id="totalItems">0</span> 条记录</span>
+                </div>
+                <div class="pagination-controls">
+                    <button class="btn btn-default pagination-btn" onclick="changePage(1)" id="firstPage">首页</button>
+                    <button class="btn btn-default pagination-btn" onclick="changePage(currentPage - 1)" id="prevPage">上一页</button>
+                    <div class="page-numbers" id="pageNumbers"></div>
+                    <button class="btn btn-default pagination-btn" onclick="changePage(currentPage + 1)" id="nextPage">下一页</button>
+                    <button class="btn btn-default pagination-btn" id="lastPage">末页</button>
+                    <span class="page-size">
+                        每页显示：
+                        <select id="pageSize" onchange="changePageSize()">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="30">30</option>
+                        </select>
+                    </span>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // 模拟数据
-        var mockData = [
-            {
-                id: 1,
-                time: '2024-04-20 14:32:15',
-                registerNo: 'JS00001',
-                siteNo: 'TC-001',
-                event: 'device-alarm',
-                eventType: 'overload',
-                eventReason: '起重量超过额定载荷的110%，触发超载保护机制',
-                amplitude: '25.6m',
-                tiltAngle: '0.8°',
-                height: '45.2m',
-                weight: '12.5t',
-                torque: '320%',
-                windSpeed: '8.2m/s',
-                rotationAngle: '135°'
-            },
-            {
-                id: 2,
-                time: '2024-04-20 10:15:42',
-                registerNo: 'JS00002',
-                siteNo: 'TC-002',
-                event: 'violation-warning',
-                eventType: 'area-limit',
-                eventReason: '——',
-                amplitude: '18.3m',
-                tiltAngle: '0.5°',
-                height: '38.7m',
-                weight: '6.8t',
-                torque: '185%',
-                windSpeed: '——',
-                rotationAngle: '——'
-            },
-            {
-                id: 3,
-                time: '2024-04-19 16:48:33',
-                registerNo: 'JS00003',
-                siteNo: 'TC-003',
-                event: 'fault',
-                eventType: 'monitor-fault',
-                eventReason: '监控模块通信中断，数据传输异常，需检查网络连接',
-                amplitude: '32.1m',
-                tiltAngle: '——',
-                height: '52.4m',
-                weight: '8.2t',
-                torque: '210%',
-                windSpeed: '6.8m/s',
-                rotationAngle: '200°'
+        // 生成30条模拟数据
+        function generateMockData() {
+            var data = [];
+            var eventTypes = ['device-alarm', 'violation-warning', 'fault'];
+            var deviceAlarmTypes = ['overload', 'torque-overload', 'limit-alarm', 'wind-speed', 'slewing-warning', 'tilt', 'interference', 'obstacle-collision', 'forbidden-zone'];
+            var violationTypes = ['overload', 'area-limit', 'identity-verify', 'device-collision', 'obstacle-collision'];
+            var faultTypes = ['monitor-fault', 'limiter-fault', 'balance-fault'];
+            var registerNos = ['JS00001', 'JS00002', 'JS00003', 'JS00004', 'JS00005'];
+            
+            for (var i = 1; i <= 30; i++) {
+                var eventType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+                var eventSubType;
+                var eventReason;
+                
+                switch(eventType) {
+                    case 'device-alarm':
+                        eventSubType = deviceAlarmTypes[Math.floor(Math.random() * deviceAlarmTypes.length)];
+                        eventReason = '设备报警原因 ' + i;
+                        break;
+                    case 'violation-warning':
+                        eventSubType = violationTypes[Math.floor(Math.random() * violationTypes.length)];
+                        eventReason = '——';
+                        break;
+                    case 'fault':
+                        eventSubType = faultTypes[Math.floor(Math.random() * faultTypes.length)];
+                        eventReason = '设备故障原因 ' + i;
+                        break;
+                }
+                
+                var date = new Date();
+                date.setHours(date.getHours() - Math.floor(Math.random() * 240));
+                var timeStr = date.getFullYear() + '-' + 
+                             String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                             String(date.getDate()).padStart(2, '0') + ' ' + 
+                             String(date.getHours()).padStart(2, '0') + ':' + 
+                             String(date.getMinutes()).padStart(2, '0') + ':' + 
+                             String(date.getSeconds()).padStart(2, '0');
+                
+                var item = {
+                    id: i,
+                    time: timeStr,
+                    registerNo: registerNos[Math.floor(Math.random() * registerNos.length)],
+                    siteNo: 'TC-' + String(i).padStart(3, '0'),
+                    event: eventType,
+                    eventType: eventSubType,
+                    eventReason: eventReason,
+                    amplitude: (10 + Math.random() * 40).toFixed(1) + 'm',
+                    tiltAngle: eventType === 'fault' ? '——' : (Math.random() * 2).toFixed(1) + '°',
+                    height: (30 + Math.random() * 30).toFixed(1) + 'm',
+                    weight: (2 + Math.random() * 18).toFixed(1) + 't',
+                    torque: (100 + Math.random() * 300).toFixed(0) + '%',
+                    windSpeed: eventType === 'violation-warning' ? '——' : (Math.random() * 15).toFixed(1) + 'm/s',
+                    rotationAngle: eventType === 'violation-warning' ? '——' : Math.floor(Math.random() * 360) + '°'
+                };
+                data.push(item);
             }
-        ];
+            return data;
+        }
+
+        // 模拟数据
+        var mockData = generateMockData();
 
         // 事件类型映射
         var eventTypeMap = {
@@ -490,6 +595,11 @@
             'balance-fault': '平衡故障'
         };
 
+        // 分页相关变量
+        var currentPage = 1;
+        var pageSize = 10;
+        var filteredData = [];
+
         // 获取事件类型对应的样式类
         function getEventTypeClass(event) {
             switch(event) {
@@ -514,7 +624,7 @@
             }
         }
 
-        // 渲染表格数据
+        // 渲染表格数据（支持分页）
         function renderTable(data) {
             var tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = '';
@@ -526,7 +636,12 @@
                 return;
             }
 
-            data.forEach(function(item) {
+            // 计算当前页的数据
+            var startIndex = (currentPage - 1) * pageSize;
+            var endIndex = Math.min(startIndex + pageSize, data.length);
+            var currentPageData = data.slice(startIndex, endIndex);
+
+            currentPageData.forEach(function(item) {
                 var tr = document.createElement('tr');
                 tr.innerHTML = 
                     '<td>' + item.id + '</td>' +
@@ -545,6 +660,58 @@
                     '<td class="numeric">' + item.rotationAngle + '</td>';
                 tableBody.appendChild(tr);
             });
+
+            // 更新分页信息
+            updatePagination(data.length);
+        }
+
+        // 更新分页控件
+        function updatePagination(totalItems) {
+            document.getElementById('totalItems').textContent = totalItems;
+            
+            var totalPages = Math.ceil(totalItems / pageSize);
+            var pageNumbersContainer = document.getElementById('pageNumbers');
+            pageNumbersContainer.innerHTML = '';
+
+            // 计算显示的页码范围
+            var startPage = Math.max(1, currentPage - 2);
+            var endPage = Math.min(totalPages, startPage + 4);
+
+            // 创建页码按钮
+            for (var i = startPage; i <= endPage; i++) {
+                var pageNumber = document.createElement('div');
+                pageNumber.className = 'page-number' + (i === currentPage ? ' active' : '');
+                pageNumber.textContent = i;
+                pageNumber.onclick = function() {
+                    changePage(parseInt(this.textContent));
+                };
+                pageNumbersContainer.appendChild(pageNumber);
+            }
+
+            // 更新按钮状态
+            document.getElementById('firstPage').disabled = currentPage === 1;
+            document.getElementById('prevPage').disabled = currentPage === 1;
+            document.getElementById('nextPage').disabled = currentPage === totalPages;
+            document.getElementById('lastPage').disabled = currentPage === totalPages;
+            document.getElementById('lastPage').onclick = function() {
+                changePage(totalPages);
+            };
+        }
+
+        // 切换页码
+        function changePage(pageNum) {
+            var totalPages = Math.ceil(filteredData.length / pageSize);
+            if (pageNum >= 1 && pageNum <= totalPages) {
+                currentPage = pageNum;
+                renderTable(filteredData);
+            }
+        }
+
+        // 改变每页显示条数
+        function changePageSize() {
+            pageSize = parseInt(document.getElementById('pageSize').value);
+            currentPage = 1;
+            renderTable(filteredData);
         }
 
         // 事件类型切换 - 控制条件筛选器的显示隐藏
@@ -584,7 +751,7 @@
             var faultType = document.getElementById('faultType').value;
 
             // 过滤数据
-            var filteredData = mockData.filter(function(item) {
+            filteredData = mockData.filter(function(item) {
                 // 事件类型过滤
                 if (eventType && item.event !== eventType) {
                     return false;
@@ -615,6 +782,10 @@
                 return true;
             });
 
+            // 重置分页
+            currentPage = 1;
+            pageSize = parseInt(document.getElementById('pageSize').value);
+
             // 重新渲染表格
             renderTable(filteredData);
         }
@@ -635,8 +806,13 @@
             document.getElementById('violationFilter').classList.remove('active');
             document.getElementById('faultFilter').classList.remove('active');
 
+            // 重置分页
+            currentPage = 1;
+            pageSize = parseInt(document.getElementById('pageSize').value);
+            filteredData = mockData;
+
             // 重新渲染全部数据
-            renderTable(mockData);
+            renderTable(filteredData);
         }
 
         // 绑定事件类型切换事件
@@ -650,8 +826,11 @@
             document.getElementById('endDate').value = today.toISOString().substring(0, 10);
             document.getElementById('startDate').value = lastWeek.toISOString().substring(0, 10);
 
+            // 初始化过滤数据
+            filteredData = mockData;
+
             // 渲染初始数据
-            renderTable(mockData);
+            renderTable(filteredData);
         };
     </script>
 </body>
